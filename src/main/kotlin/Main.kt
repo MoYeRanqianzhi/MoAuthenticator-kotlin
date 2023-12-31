@@ -6,9 +6,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
 import androidx.compose.ui.graphics.Color
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -21,8 +21,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.platform.Font
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.*
 import dev.turingcomplete.kotlinonetimepassword.GoogleAuthenticator
 import dev.turingcomplete.kotlinonetimepassword.HmacAlgorithm
@@ -80,12 +84,12 @@ class TOTP {
 fun App() {
     var screen by remember { mutableStateOf(Screen.Home) }
     val totp = TOTP()
-    totp.add("Google", "K6IPBKCQTVLCZDM2".toByteArray())
-    totp.add("Facebook", "K6IPBHEQTVLCZDM2".toByteArray())
-    totp.add("Twitter", "K6IPBHCQEVLCZDM2".toByteArray())
-    totp.add("OpenAI", "K6IPBHCQTVLCEDM2".toByteArray())
-    totp.add("Github", "K6IPBHCQTVLCZDM2".toByteArray())
-    totp.add("MoChat", "K6IPBHCQTVKCZDM2".toByteArray())
+//    totp.add("Google", "K6IPBKCQTVLCZDM2".toByteArray())
+//    totp.add("Facebook", "K6IPBHEQTVLCZDM2".toByteArray())
+//    totp.add("Twitter", "K6IPBHCQEVLCZDM2".toByteArray())
+//    totp.add("OpenAI", "K6IPBHCQTVLCEDM2".toByteArray())
+//    totp.add("Github", "K6IPBHCQTVLCZDM2".toByteArray())
+//    totp.add("MoChat", "K6IPBHCQTVKCZDM2".toByteArray())
 
 
     MaterialTheme {
@@ -134,6 +138,10 @@ fun Home(t: TOTP) {
     var inputText by remember { mutableStateOf("") }
     var diglog by remember { mutableStateOf(false) }
 
+    val harmonyFont = FontFamily(
+        Font("font/HarmonyOSBlack.ttf", FontWeight.Black)
+    )
+
 //    Button(onClick = {
 //        text = "Hello, Desktop!"
 //    }) {
@@ -155,84 +163,91 @@ fun Home(t: TOTP) {
             }
         }, 0, 100)
     }
-    if (new) {
-        new = false
-        LazyColumn {
-            val timestamp = Date(System.currentTimeMillis())
-            items(items = t.authenticators) { auth ->
-                Text(
-                    auth.platform + "    " + t.compute(auth, timestamp) + "    " + time.toString(),
-                    color = Color.Black
-                )
+    Box {
+        Scaffold(
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = {
+                        diglog = true
+                    }
+                ) {
+                    Icon(Icons.Filled.Add, "Add a new auth.")
+                }
+            }
+        ) {}
+        if (new) {
+            new = false
+            LazyColumn {
+                val timestamp = Date(System.currentTimeMillis())
+                items(items = t.authenticators) { auth ->
+                    SelectionContainer {
+                        Text(
+                            auth.platform + "    " + t.compute(auth, timestamp) + "    " + time.toString(),
+                            color = Color.Black,
+                            fontSize = 30.sp,
+                            fontFamily = harmonyFont,
+                            fontWeight = FontWeight.Black
+                        )
+                    }
+                }
             }
         }
-    }
-    Scaffold(
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    diglog = true
+        if (diglog) {
+            Dialog(
+                onDismissRequest = {
+                    diglog = false
+                    new = true
                 }
             ) {
-                Icon(Icons.Filled.Add, "Add a new auth.")
-            }
-        }
-    ) {}
-    if (diglog) {
-        Dialog(
-            onDismissRequest = {
-                diglog = false
-                new = true
-            }
-        ) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .padding(16.dp),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Row(
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
+                        .height(200.dp)
+                        .padding(16.dp),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
-                    TextField(
-                        value = inputText,
-                        onValueChange = {
-                            inputText = it
-                        },
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            imeAction = ImeAction.Send
-                        ),
-                        keyboardActions = KeyboardActions(
-                            onSend = {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        TextField(
+                            value = inputText,
+                            onValueChange = {
+                                inputText = it
+                            },
+                            keyboardOptions = KeyboardOptions.Default.copy(
+                                imeAction = ImeAction.Send
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onSend = {
+                                    if (inputText.isNotEmpty()) {
+                                        t.add("New", inputText.toByteArray())
+                                        inputText = ""
+                                    }
+                                }
+                            ),
+                            modifier = Modifier
+                                .background(androidx.compose.material3.MaterialTheme.colorScheme.background)
+                                .padding(8.dp),
+                            shape = RoundedCornerShape(30.dp),
+                            singleLine = true
+                        )
+                        IconButton(
+                            onClick = {
                                 if (inputText.isNotEmpty()) {
                                     t.add("New", inputText.toByteArray())
                                     inputText = ""
                                 }
                             }
-                        ),
-                        modifier = Modifier
-                            .background(androidx.compose.material3.MaterialTheme.colorScheme.background)
-                            .padding(8.dp),
-                        shape = RoundedCornerShape(30.dp),
-                        singleLine = true
-                    )
-                    IconButton(
-                        onClick = {
-                            if (inputText.isNotEmpty()) {
-                                t.add("New", inputText.toByteArray())
-                                inputText = ""
-                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.AddCircle,
+                                contentDescription = "Send",
+                                modifier = Modifier.size(50.dp)
+                            )
                         }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.AddCircle,
-                            contentDescription = "Send",
-                            modifier = Modifier.size(50.dp)
-                        )
                     }
                 }
             }
