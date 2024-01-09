@@ -32,6 +32,7 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.rounded.AddCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
@@ -391,7 +392,6 @@ fun Home(t: TOTP, dialogState: MutableState<Boolean>) {
             modifier = Modifier
                 .fillMaxWidth()
                 .verticalScroll(scroll)
-                .padding(16.dp)
         ) {
             if (totp.isNotEmpty()) {
                 for (p in totp.split("\n\n")) {
@@ -546,6 +546,44 @@ fun Settings() {
     }
 }
 
+
+@Composable
+@Preview
+fun Title() {
+    Row {
+        Text(
+            text = "MoAuthenticator",
+            fontSize = 16.sp,
+            fontFamily = AppFonts.HarmonyOSSans.SC,
+            fontWeight = FontWeight.Bold,
+            overflow = TextOverflow.Clip,
+            maxLines = 1
+        )
+        Card(
+            modifier = Modifier
+                .padding(6.dp, 0.dp)
+                .align(Alignment.CenterVertically),
+            shape = MaterialTheme.shapes.large,
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer
+            )
+        ) {
+            Text(
+                text = "内测版",
+                modifier = Modifier
+                    .padding(6.dp, 0.dp),
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 12.sp,
+                fontFamily = AppFonts.HarmonyOSSans.SC,
+                fontWeight = FontWeight.Medium,
+                overflow = TextOverflow.Clip,
+                maxLines = 1
+            )
+        }
+    }
+
+}
+
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() = application {
     val undecoratedState = remember { mutableStateOf(true) }
@@ -603,16 +641,12 @@ fun main() = application {
                                 .padding(24.dp, 6.dp)
                                 .background(MaterialTheme.colorScheme.background)
                         ) {
-                            Text(
-                                text = "MoAuthenticator",
+                            Box(
                                 modifier = Modifier
-                                    .align(Alignment.CenterStart),
-                                fontSize = 16.sp,
-                                fontFamily = AppFonts.HarmonyOSSans.SC,
-                                fontWeight = FontWeight.Bold,
-                                overflow = TextOverflow.Clip,
-                                maxLines = 1
-                            )
+                                    .align(Alignment.CenterStart)
+                            ) {
+                                Title()
+                            }
 
                             Box(
                                 modifier = Modifier
